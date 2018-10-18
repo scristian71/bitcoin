@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(gcsfilter_test)
 
 BOOST_AUTO_TEST_CASE(blockfilter_basic_test)
 {
-    CScript included_scripts[5], excluded_scripts[2];
+    CScript included_scripts[5], excluded_scripts[3];
 
     // First two are outputs on a single transaction.
     included_scripts[0] << std::vector<unsigned char>(0, 65) << OP_CHECKSIG;
@@ -67,6 +67,7 @@ BOOST_AUTO_TEST_CASE(blockfilter_basic_test)
     CMutableTransaction tx_2;
     tx_2.vout.emplace_back(300, included_scripts[2]);
     tx_2.vout.emplace_back(0, excluded_scripts[0]);
+    tx_2.vout.emplace_back(400, excluded_scripts[2]); // Script is empty
 
     CBlock block;
     block.vtx.push_back(MakeTransactionRef(tx_1));
@@ -74,8 +75,9 @@ BOOST_AUTO_TEST_CASE(blockfilter_basic_test)
 
     CBlockUndo block_undo;
     block_undo.vtxundo.emplace_back();
-    block_undo.vtxundo.back().vprevout.emplace_back(CTxOut(400, included_scripts[3]), 1000, true);
-    block_undo.vtxundo.back().vprevout.emplace_back(CTxOut(500, included_scripts[4]), 10000, false);
+    block_undo.vtxundo.back().vprevout.emplace_back(CTxOut(500, included_scripts[3]), 1000, true);
+    block_undo.vtxundo.back().vprevout.emplace_back(CTxOut(600, included_scripts[4]), 10000, false);
+    block_undo.vtxundo.back().vprevout.emplace_back(CTxOut(700, excluded_scripts[2]), 100000, false);
 
     BlockFilter block_filter(BlockFilterType::BASIC, block, block_undo);
     const GCSFilter& filter = block_filter.GetFilter();
@@ -112,7 +114,8 @@ BOOST_AUTO_TEST_CASE(blockfilters_json_test)
 
         unsigned int pos = 0;
         /*int block_height =*/ test[pos++].get_int();
-        /*uint256 block_hash =*/ ParseHashStr(test[pos++].get_str(), "block_hash");
+        uint256 block_hash;
+        BOOST_CHECK(ParseHashStr(test[pos++].get_str(), block_hash));
 
         CBlock block;
         BOOST_REQUIRE(DecodeHexBlk(block, test[pos++].get_str()));
@@ -127,9 +130,11 @@ BOOST_AUTO_TEST_CASE(blockfilters_json_test)
             tx_undo.vprevout.emplace_back(txout, 0, false);
         }
 
-        uint256 prev_filter_header_basic = ParseHashStr(test[pos++].get_str(), "prev_filter_header_basic");
+        uint256 prev_filter_header_basic;
+        BOOST_CHECK(ParseHashStr(test[pos++].get_str(), prev_filter_header_basic));
         std::vector<unsigned char> filter_basic = ParseHex(test[pos++].get_str());
-        uint256 filter_header_basic = ParseHashStr(test[pos++].get_str(), "filter_header_basic");
+        uint256 filter_header_basic;
+        BOOST_CHECK(ParseHashStr(test[pos++].get_str(), filter_header_basic));
 
         BlockFilter computed_filter_basic(BlockFilterType::BASIC, block, block_undo);
         BOOST_CHECK(computed_filter_basic.GetFilter().GetEncoded() == filter_basic);

@@ -7,6 +7,7 @@
 from test_framework.test_framework import BitcoinTestFramework
 from test_framework.util import assert_equal, assert_raises_rpc_error
 
+
 class HelpRpcTest(BitcoinTestFramework):
     def set_test_params(self):
         self.num_nodes = 1
@@ -25,7 +26,17 @@ class HelpRpcTest(BitcoinTestFramework):
 
         # command titles
         titles = [line[3:-3] for line in node.help().splitlines() if line.startswith('==')]
-        assert_equal(titles, ['Blockchain', 'Control', 'Generating', 'Mining', 'Network', 'Rawtransactions', 'Util', 'Wallet', 'Zmq'])
+
+        components = ['Blockchain', 'Control', 'Generating', 'Mining', 'Network', 'Rawtransactions', 'Util']
+
+        if self.is_wallet_compiled():
+            components.append('Wallet')
+
+        if self.is_zmq_compiled():
+            components.append('Zmq')
+
+        assert_equal(titles, components)
+
 
 if __name__ == '__main__':
     HelpRpcTest().main()
