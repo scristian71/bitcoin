@@ -21,7 +21,38 @@ import struct
 import sys
 import threading
 
-from test_framework.messages import CBlockHeader, MIN_VERSION_SUPPORTED, msg_addr, msg_block, MSG_BLOCK, msg_blocktxn, msg_cmpctblock, msg_feefilter, msg_getaddr, msg_getblocks, msg_getblocktxn, msg_getdata, msg_getheaders, msg_headers, msg_inv, msg_mempool, msg_ping, msg_pong, msg_reject, msg_sendcmpct, msg_sendheaders, msg_tx, MSG_TX, MSG_TYPE_MASK, msg_verack, msg_version, NODE_NETWORK, NODE_WITNESS, sha256
+from test_framework.messages import (
+    CBlockHeader,
+    MIN_VERSION_SUPPORTED,
+    msg_addr,
+    msg_block,
+    MSG_BLOCK,
+    msg_blocktxn,
+    msg_cmpctblock,
+    msg_feefilter,
+    msg_getaddr,
+    msg_getblocks,
+    msg_getblocktxn,
+    msg_getdata,
+    msg_getheaders,
+    msg_headers,
+    msg_inv,
+    msg_mempool,
+    msg_notfound,
+    msg_ping,
+    msg_pong,
+    msg_reject,
+    msg_sendcmpct,
+    msg_sendheaders,
+    msg_tx,
+    MSG_TX,
+    MSG_TYPE_MASK,
+    msg_verack,
+    msg_version,
+    NODE_NETWORK,
+    NODE_WITNESS,
+    sha256,
+)
 from test_framework.util import wait_until
 
 logger = logging.getLogger("TestFramework.mininode")
@@ -40,6 +71,7 @@ MESSAGEMAP = {
     b"headers": msg_headers,
     b"inv": msg_inv,
     b"mempool": msg_mempool,
+    b"notfound": msg_notfound,
     b"ping": msg_ping,
     b"pong": msg_pong,
     b"reject": msg_reject,
@@ -295,6 +327,7 @@ class P2PInterface(P2PConnection):
     def on_getheaders(self, message): pass
     def on_headers(self, message): pass
     def on_mempool(self, message): pass
+    def on_notfound(self, message): pass
     def on_pong(self, message): pass
     def on_reject(self, message): pass
     def on_sendcmpct(self, message): pass
@@ -500,9 +533,9 @@ class P2PDataStore(P2PInterface):
                 wait_until(lambda: blocks[-1].sha256 in self.getdata_requests, timeout=timeout, lock=mininode_lock)
 
             if expect_disconnect:
-                self.wait_for_disconnect()
+                self.wait_for_disconnect(timeout=timeout)
             else:
-                self.sync_with_ping()
+                self.sync_with_ping(timeout=timeout)
 
             if success:
                 wait_until(lambda: node.getbestblockhash() == blocks[-1].hash, timeout=timeout)
