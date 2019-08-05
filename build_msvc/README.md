@@ -17,40 +17,34 @@ Options for installing the dependencies in a Visual Studio compatible manner are
 - Download the source code, build each dependency, add the required include paths, link libraries and binary tools to the Visual Studio project files.
 - Use [nuget](https://www.nuget.org/) packages with the understanding that any binary files have been compiled by an untrusted third party.
 
-The external dependencies required for the Visual Studio build are (see the [dependencies doc](https://github.com/bitcoin/bitcoin/blob/master/doc/dependencies.md) for versions):
+The external dependencies required for the Visual Studio build are (see [dependencies.md](https://github.com/bitcoin/bitcoin/blob/master/doc/dependencies.md) for more info):
 
-- Berkeley DB,
-- OpenSSL,
-- Boost,
-- libevent,
+- Berkeley DB
+- OpenSSL
+- Boost
+- libevent
 - ZeroMQ
+- RapidCheck
 
-Additional dependencies required from the [bitcoin-core](https://github.com/bitcoin-core) github repository are:
-- SECP256K1,
+Additional dependencies required from the [bitcoin-core](https://github.com/bitcoin-core) GitHub repository are:
+- libsecp256k1
 - LevelDB
 
 Building
 ---------------------
-The instructions below use vcpkg to install the dependencies.
+The instructions below use `vcpkg` to install the dependencies.
 
-- Clone and vcpkg from the [github repository](https://github.com/Microsoft/vcpkg) and install as per the instructions in the main README.md.
+- Clone `vcpkg` from the [github repository](https://github.com/Microsoft/vcpkg) and install as per the instructions in the main README.md.
 - Install the required packages (replace x64 with x86 as required):
-- Install the required dependencies with vcpkg:
 
 ```
-    PS >.\vcpkg install boost:x64-windows-static `
-    libevent:x64-windows-static `
-    openssl:x64-windows-static `
-    zeromq:x64-windows-static `
-    berkeleydb:x64-windows-static `
-    secp256k1:x64-windows-static `
-    leveldb:x64-windows-static
+    PS >.\vcpkg install --triplet x64-windows-static boost-filesystem boost-signals2 boost-test libevent openssl zeromq berkeleydb secp256k1 leveldb rapidcheck
 ```
 
 - Use Python to generate *.vcxproj from Makefile
 
 ```
-    PS >python msvc-autogen.py
+    PS >py -3 msvc-autogen.py
 ```
 
 - Build in Visual Studio.

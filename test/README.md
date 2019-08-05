@@ -13,12 +13,12 @@ bitcoin-tx.
 - [lint](/test/lint/) which perform various static analysis checks.
 
 The util tests are run as part of `make check` target. The functional
-tests and lint scripts are run by the travis continuous build process whenever a pull
-request is opened. All sets of tests can also be run locally.
+tests and lint scripts can be run as explained in the sections below.
 
 # Running tests locally
 
-Build for your system first. Be sure to enable wallet, utils and daemon when you configure. Tests will not run otherwise.
+Before tests can be run locally, Bitcoin Core must be built.  See the [building instructions](/doc#building) for help.
+
 
 ### Functional tests
 
@@ -47,6 +47,29 @@ You can run any combination (incl. duplicates) of tests by calling:
 
 ```
 test/functional/test_runner.py <testname1> <testname2> <testname3> ...
+```
+
+Wildcard test names can be passed, if the paths are coherent and the test runner
+is called from a `bash` shell or similar that does the globbing. For example,
+to run all the wallet tests:
+
+```
+test/functional/test_runner.py test/functional/wallet*
+functional/test_runner.py functional/wallet* (called from the test/ directory)
+test_runner.py wallet* (called from the test/functional/ directory)
+```
+
+but not
+
+```
+test/functional/test_runner.py wallet*
+```
+
+Combinations of wildcards can be passed:
+
+```
+test/functional/test_runner.py ./test/functional/tool* test/functional/mempool*
+test_runner.py tool* mempool*
 ```
 
 Run the regression test suite with:
@@ -174,7 +197,28 @@ cat /tmp/user/1000/testo9vsdjo3/node1/regtest/bitcoind.pid
 gdb /home/example/bitcoind <pid>
 ```
 
-Note: gdb attach step may require `sudo`
+Note: gdb attach step may require ptrace_scope to be modified, or `sudo` preceding the `gdb`.
+See this link for considerations: https://www.kernel.org/doc/Documentation/security/Yama.txt
+
+##### Profiling
+
+An easy way to profile node performance during functional tests is provided
+for Linux platforms using `perf`.
+
+Perf will sample the running node and will generate profile data in the node's
+datadir. The profile data can then be presented using `perf report` or a graphical
+tool like [hotspot](https://github.com/KDAB/hotspot).
+
+To generate a profile during test suite runs, use the `--perf` flag.
+
+To see render the output to text, run
+
+```sh
+perf report -i /path/to/datadir/send-big-msgs.perf.data.xxxx --stdio | c++filt | less
+```
+
+For ways to generate more granular profiles, see the README in
+[test/functional](/test/functional).
 
 ### Util tests
 
