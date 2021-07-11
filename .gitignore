@@ -5,10 +5,13 @@
 src/bitcoin
 src/bitcoind
 src/bitcoin-cli
+src/bitcoin-gui
+src/bitcoin-node
 src/bitcoin-tx
+src/bitcoin-util
 src/bitcoin-wallet
+src/test/fuzz/fuzz
 src/test/test_bitcoin
-src/test/test_bitcoin_fuzzy
 src/qt/test/test_bitcoin-qt
 
 # autoreconf
@@ -28,6 +31,7 @@ build-aux/m4/ltversion.m4
 build-aux/missing
 build-aux/compile
 build-aux/test-driver
+config.cache
 config.log
 config.status
 configure
@@ -35,6 +39,7 @@ libtool
 src/config/bitcoin-config.h
 src/config/bitcoin-config.h.in
 src/config/stamp-h1
+src/obj
 share/setup.nsi
 share/qt/Info.plist
 
@@ -56,7 +61,7 @@ src/qt/bitcoin-qt.includes
 .dirstamp
 .libs
 .*.swp
-*.*~*
+*~
 *.bak
 *.rej
 *.orig
@@ -71,6 +76,7 @@ src/qt/bitcoin-qt.includes
 *.log
 *.trs
 *.dmg
+*.iso
 
 *.json.h
 *.raw.h
@@ -87,7 +93,7 @@ src/qt/bitcoin-qt.includes
 *.qm
 Makefile
 !depends/Makefile
-bitcoin-qt
+src/qt/bitcoin-qt
 Bitcoin-Qt.app
 background.tiff*
 
@@ -105,13 +111,19 @@ qrc_*.cpp
 .DS_Store
 build
 
+# Previous releases
+releases
+
 #lcov
 *.gcno
 *.gcda
 /*.info
 test_bitcoin.coverage/
 total.coverage/
+fuzz.coverage/
 coverage_percent.txt
+/cov_tool_wrapper.sh
+qa-assets/
 
 #build tests
 linux-coverage-build
@@ -119,6 +131,7 @@ linux-build
 win32-build
 test/config.ini
 test/cache/*
+test/.mypy_cache/
 
 !src/leveldb*/Makefile
 
@@ -132,3 +145,9 @@ db4/
 
 # clang-check
 *.plist
+
+osx_volname
+dist/
+*.background.tiff
+
+/guix-build-*
